@@ -1,0 +1,71 @@
+! =====================================================
+! MULTI-VENDOR ENTERPRISE NETWORK
+! Device: Huawei R3
+! Role: Branch Router
+! =====================================================
+
+system-view
+
+sysname R3-HUAWEI
+
+! -----------------------------------------------------
+! Interface Configuration
+! -----------------------------------------------------
+
+interface GigabitEthernet0/0/0
+ description Connection to Juniper R2
+ ip address 10.0.23.2 255.255.255.252
+ undo shutdown
+ quit
+
+interface GigabitEthernet0/0/1
+ description Branch LAN
+ ip address 192.168.10.1 255.255.255.0
+ undo shutdown
+ quit
+
+! -----------------------------------------------------
+! OSPF Configuration
+! -----------------------------------------------------
+
+ospf 1 router-id 3.3.3.3
+
+ area 0.0.0.0
+  network 10.0.23.0 0.0.0.3
+  network 192.168.10.0 0.0.0.255
+ quit
+
+! -----------------------------------------------------
+! DHCP Configuration
+! -----------------------------------------------------
+
+dhcp enable
+
+ip pool BRANCH-DHCP
+ gateway-list 192.168.10.1
+ network 192.168.10.0 mask 255.255.255.0
+ excluded-ip-address 192.168.10.1
+ excluded-ip-address 192.168.10.2 192.168.10.99
+ excluded-ip-address 192.168.10.201 192.168.10.254
+ dns-list 8.8.8.8
+ quit
+
+interface GigabitEthernet0/0/1
+ dhcp select global
+ quit
+
+!! -----------------------------------------------------
+! Branch LAN Security ACL
+! -----------------------------------------------------
+
+acl number 3000
+ rule 5 permit ip source 192.168.10.0 0.0.0.255
+ rule 10 deny ip
+
+
+quit
+
+
+! =====================================================
+! END OF CONFIGURATION
+! =====================================================

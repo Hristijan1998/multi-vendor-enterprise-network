@@ -1,0 +1,71 @@
+# =====================================================
+# MULTI-VENDOR ENTERPRISE NETWORK
+# Device: Juniper R2
+# Role: Core Router
+# =====================================================
+
+# -----------------------------------------------------
+# System Configuration
+# -----------------------------------------------------
+
+set system host-name R2-JUNIPER
+
+# -----------------------------------------------------
+# Interface Configuration
+# -----------------------------------------------------
+
+set interfaces ge-0/0/0 description "Connection to Cisco R1"
+set interfaces ge-0/0/0 unit 0 family inet address 10.0.12.2/30
+
+set interfaces ge-0/0/1 description "Connection to Huawei R3"
+set interfaces ge-0/0/1 unit 0 family inet address 10.0.23.1/30
+
+# -----------------------------------------------------
+# OSPF Configuration
+# -----------------------------------------------------
+
+set protocols ospf router-id 2.2.2.2
+
+set protocols ospf area 0.0.0.0 interface ge-0/0/0.0
+set protocols ospf area 0.0.0.0 interface ge-0/0/1.0
+
+# -----------------------------------------------------
+# Static Route
+# -----------------------------------------------------
+
+
+# -----------------------------------------------------
+# Management Security
+# -----------------------------------------------------
+
+set system services ssh
+
+# -----------------------------------------------------
+# Firewall Filter
+# -----------------------------------------------------
+
+set firewall family inet filter CORE-PROTECTION term ALLOW-ESTABLISHED from protocol tcp
+set firewall family inet filter CORE-PROTECTION term ALLOW-ESTABLISHED from tcp-established
+set firewall family inet filter CORE-PROTECTION term ALLOW-ESTABLISHED then accept
+
+set firewall family inet filter CORE-PROTECTION term ALLOW-ICMP from protocol icmp
+set firewall family inet filter CORE-PROTECTION term ALLOW-ICMP then accept
+
+set firewall family inet filter CORE-PROTECTION term ALLOW-OSPF from protocol ospf
+set firewall family inet filter CORE-PROTECTION term ALLOW-OSPF then accept
+
+set firewall family inet filter CORE-PROTECTION term ALLOW-INTERNAL from source-address 10.0.12.0/30
+set firewall family inet filter CORE-PROTECTION term ALLOW-INTERNAL then accept
+
+set firewall family inet filter CORE-PROTECTION term ALLOW-BRANCH from source-address 10.0.23.0/30
+set firewall family inet filter CORE-PROTECTION term ALLOW-BRANCH then accept
+
+set firewall family inet filter CORE-PROTECTION term DENY-REST then log
+set firewall family inet filter CORE-PROTECTION term DENY-REST then discard
+
+
+# =====================================================
+# END OF CONFIGURATION
+# =====================================================
+
+

@@ -1,0 +1,78 @@
+! =====================================================
+! MULTI-VENDOR ENTERPRISE NETWORK
+! Device: Cisco R1
+! Role: Edge Router
+! =====================================================
+
+hostname R1-CISCO
+
+! -----------------------------------------------------
+! Interface Configuration
+! -----------------------------------------------------
+
+interface GigabitEthernet0/0
+ description Connection to Internet
+ ip address 203.0.113.2 255.255.255.252
+ ip nat outside
+ no shutdown
+
+interface GigabitEthernet0/1
+ description Connection to Juniper R2
+ ip address 10.0.12.1 255.255.255.252
+ ip nat inside
+ no shutdown
+
+! -----------------------------------------------------
+! Default Route
+! -----------------------------------------------------
+
+ip route 0.0.0.0 0.0.0.0 203.0.113.1
+
+! -----------------------------------------------------
+! OSPF Configuration
+! -----------------------------------------------------
+
+router ospf 1
+ router-id 1.1.1.1
+ network 10.0.12.0 0.0.0.3 area 0
+ network 203.0.113.0 0.0.0.3 area 0
+ passive-interface GigabitEthernet0/0
+ default-information originate
+
+! -----------------------------------------------------
+! NAT Configuration
+! -----------------------------------------------------
+
+access-list 10 permit 192.168.10.0 0.0.0.255
+
+ip nat inside source list 10 interface GigabitEthernet0/0 overload
+
+! -----------------------------------------------------
+! Internet Access Control List
+! -----------------------------------------------------
+
+ip access-list extended INTERNET-FILTER
+ remark Allow established TCP return traffic
+ permit tcp any any established
+
+ remark Allow ICMP echo replies
+ permit icmp any any echo-reply
+
+ remark Block RFC1918 source addresses from Internet
+ deny ip 10.0.0.0 0.255.255.255 any log
+ deny ip 172.16.0.0 0.15.255.255 any log
+ deny ip 192.168.0.0 0.0.255.255 any log
+
+ remark Deny all other unsolicited inbound traffic
+ deny ip any any log
+
+! -----------------------------------------------------
+! Apply Internet ACL
+! -----------------------------------------------------
+
+interface GigabitEthernet0/0
+ ip access-group INTERNET-FILTER in
+
+! =====================================================
+! END OF CONFIGURATION
+! =====================================================
