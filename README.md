@@ -27,7 +27,7 @@ The Huawei router provides connectivity to the Branch LAN, while the Cisco route
 ---
 
 # Network Architecture
-
+![Multi-Vendor Enterprise Network Topology](topology/network-diagram.png)
 ```text
                          INTERNET
                             |
